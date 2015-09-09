@@ -9,6 +9,7 @@ class State {
   val SS = "//".r
   val WS = "\\s".r
   val PER = ".".r
+  val NL = "\n".r
 
   val MULT = "\\*".r
   val DIV = "/".r
@@ -30,7 +31,7 @@ class State {
   //takes a single input character and continues to create a token as long as it matches 
   //a regular expression from above
   def tokenBuffer(lexeme: String, source: Source): Token = lexeme match {
-    case SEMI(lexeme) =>
+    case SEMI() =>
       def token = new Token("SEMI", source.line, source.column, ";")
       source.advance
       token
@@ -50,6 +51,11 @@ class State {
       def token = new Token("PER", source.line, source.column, ".")
       source.advance
       token
+    case NL(lexeme) =>
+      def token = new Token("NL", source.line, source.column, "\n")
+      source.advance
+      token
+      
     case MULT(lexeme) =>
       def token = new Token("MULT", source.line, source.column, "*")
       source.advance

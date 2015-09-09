@@ -7,16 +7,8 @@ class Source(in: Reader) {
   var column = 0
   var current = '\n'
   var atEOF = false
-
-  def Source(in: Reader) {
-    this.advance
-    var line = 0
-    var column = 0
-    var current = '\n'
-    var atEOF = false
-    advance
-  }
-
+  advance
+  
   def advance {
     if (atEOF) {
       return
