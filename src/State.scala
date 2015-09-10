@@ -10,7 +10,7 @@ class State {
   val SPACE = " "
   val NEWLINE = "\n"
   val PERIOD = "."
-  val WHITESPACE = """[\s]*""".r
+  val WHITESPACE = """(?:[\s]|[\n])*""".r
   
   val STAR = "*"
   val DIV = "/"
@@ -22,6 +22,7 @@ class State {
   val CONST = "const"
   val BEG = "begin"
   val PRNT = "print"
+  val END = "end"
 
   val ZERO = "0"
 
@@ -93,25 +94,27 @@ class State {
       source.advance
       val curr = source.current.toString()
       tokenBuffer(lexeme + curr, source)
+    case NUMBER(lexeme) =>
+      source.advance
+      val curr = source.current.toString()
+      tokenBuffer(lexeme + curr, source)
       
     case _ =>
-      var prev = source.current
       var lex = lexeme.dropRight(1)
       if (lex.equals(PRG)) {
         def token = new Token("PROGRAM", source.line, source.column, null)
-        source.advance
         token
       } else if (lex.equals(CONST)) {
         def token = new Token("CONST", source.line, source.column, null)
-        source.advance
         token
       } else if (lex.equals(BEG)) {
         def token = new Token("BEG", source.line, source.column, null)
-        source.advance
         token
       } else if (lex.equals(PRNT)) {
         def token = new Token("PRINT", source.line, source.column, null)
-        source.advance
+        token
+      } else if (lex.equals(END)) {
+        def token = new Token("END", source.line, source.column, null)
         token
       } else if (NUMBER.pattern.matcher(lex).matches) {
         def token = new Token("NUM", source.line, source.column, lex)
@@ -119,7 +122,6 @@ class State {
         token
       } else if (ID.pattern.matcher(lex).matches) {
         def token = new Token("ID", source.line, source.column, lex)
-        source.advance
         token
       } else {
         def token = new Token("ID", source.line, source.column, lex)
