@@ -8,7 +8,7 @@ class State {
   val BRACKET = "{"
   val SINGLESLASH = "/"
   val SPACE = " "
-  val NEWLINE = "'\n'"
+  val NEWLINE = "\n"
   val PERIOD = "."
   val WHITESPACE = """[\s]*""".r
   
@@ -33,11 +33,12 @@ class State {
   //a regular expression from above
   def tokenBuffer(lexeme: String, source: Source): Token = lexeme match {
     case SEMI =>
-      def token = new Token("SEMI", source.line, source.column, ";")
+      def token = new Token("SEMI", source.line, source.column, null)
       source.advance
       token
     case BRACKET =>
       waitFor('}', source)
+      source.advance
       tokenBuffer(source.current.toString(), source)
     case SINGLESLASH =>
       source.advance
@@ -60,7 +61,7 @@ class State {
       
     //OPERATORS      
     case STAR =>
-      def token = new Token("MULT", source.line, source.column, null)
+      def token = new Token("STAR", source.line, source.column, null)
       source.advance
       token
     case DIV =>
@@ -94,6 +95,7 @@ class State {
       tokenBuffer(lexeme + curr, source)
       
     case _ =>
+      var prev = source.current
       var lex = lexeme.dropRight(1)
       if (lex.equals(PRG)) {
         def token = new Token("PROGRAM", source.line, source.column, null)
@@ -130,13 +132,6 @@ class State {
     while (source.current != ch) {
       source.advance
     }
-  }
- // def shouldAdvance(source: Source) = {
- //   val curr = source.current
- //   source.advance
- //   if ()
- // }
-  
-  
+  }  
 }
 
