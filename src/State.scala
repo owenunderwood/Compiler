@@ -25,7 +25,7 @@ class State {
   val ZERO = "0"
 
   val NUMBER = """[1-9]?:([0-9])*""".r
-  val ID = """(\w?:(\w|\d)*)""".r
+  val ID = """\w?:(\w)*""".r
 
   //takes a single input character and continues to create a token as long as it matches 
   //a regular expression from above
