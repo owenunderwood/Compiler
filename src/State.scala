@@ -7,11 +7,11 @@ class State {
   val SEMI = ";"
   val BRACKET = "{"
   val SINGLESLASH = "/"
-  val WHITESPACE = """\s""".r
+  val SPACE = " "
+  val NEWLINE = "'\n'"
   val PERIOD = "."
-  val NEWLINE = """\n""".r
-  val NL = "\n".r
-
+  val WHITESPACE = """[\s]*""".r
+  
   val STAR = "*"
   val DIV = "/"
   val PLUS = "+"
@@ -25,8 +25,9 @@ class State {
 
   val ZERO = "0"
 
-  val NUMBER = """[1-9]?:([0-9])*""".r
-  val ID = """\w(:?\w|\d)*""".r
+  val NUMBER = """([1-9](?:[0-9])*)""".r
+  val ID = """([A-Za-z](?:[A-Za-z0-9])*)""".r
+  //val ID = """(\w(?:[\w|\d])*)""".r
 
   //takes a single input character and continues to create a token as long as it matches 
   //a regular expression from above
@@ -37,7 +38,7 @@ class State {
       token
     case BRACKET =>
       waitFor('}', source)
-      tokenBuffer("", source)
+      tokenBuffer(source.current.toString(), source)
     case SINGLESLASH =>
       source.advance
       if (source.current.toString() == "/") {
@@ -46,22 +47,17 @@ class State {
         print("illegal start of comment")
       }
       tokenBuffer("", source)
-    case WHITESPACE(lexeme) =>
-      source.advance
-      tokenBuffer(source.current.toString(), source)
-    case NEWLINE(lexeme) =>
-      source.advance
-      tokenBuffer(source.current.toString(), source)
     case PERIOD =>
       def token = new Token("PERIOD", source.line, source.column, null)
       source.advance
       token
-    case NL(lexeme) =>
-      def token = new Token("NL", source.line, source.column, "\n")
+    case SPACE => 
       source.advance
-      token
+      tokenBuffer(source.current.toString, source)
+    case NEWLINE => 
+      source.advance
+      tokenBuffer(source.current.toString, source)
       
-
     //OPERATORS      
     case STAR =>
       def token = new Token("MULT", source.line, source.column, null)
@@ -89,33 +85,42 @@ class State {
       token
       
       // KEYWORDS & IDENTIFIERS & NUMBERS
-    case ID(lexeme) =>
-      val curr = source.current.toString()
+    case WHITESPACE(lexeme) =>
       source.advance
+      tokenBuffer(source.current.toString(), source)
+    case ID(lexeme) =>
+      source.advance
+      val curr = source.current.toString()
       tokenBuffer(lexeme + curr, source)
+      
     case _ =>
-      if (lexeme.equals(PRG)) {
+      var lex = lexeme.dropRight(1)
+      if (lex.equals(PRG)) {
         def token = new Token("PROGRAM", source.line, source.column, null)
         source.advance
         token
-      } else if (lexeme.equals(CONST)) {
+      } else if (lex.equals(CONST)) {
         def token = new Token("CONST", source.line, source.column, null)
         source.advance
         token
-      } else if (lexeme.equals(BEG)) {
+      } else if (lex.equals(BEG)) {
         def token = new Token("BEG", source.line, source.column, null)
         source.advance
         token
-      } else if (lexeme.equals(PRNT)) {
+      } else if (lex.equals(PRNT)) {
         def token = new Token("PRINT", source.line, source.column, null)
         source.advance
         token
-      } else if (NUMBER.pattern.matcher(lexeme).matches) {
-        def token = new Token("NUM", source.line, source.column, lexeme)
+      } else if (NUMBER.pattern.matcher(lex).matches) {
+        def token = new Token("NUM", source.line, source.column, lex)
+        source.advance
+        token
+      } else if (ID.pattern.matcher(lex).matches) {
+        def token = new Token("ID", source.line, source.column, lex)
         source.advance
         token
       } else {
-        def token = new Token("ID", source.line, source.column, lexeme)
+        def token = new Token("ID", source.line, source.column, lex)
         source.advance
         token
       }
@@ -126,6 +131,11 @@ class State {
       source.advance
     }
   }
+ // def shouldAdvance(source: Source) = {
+ //   val curr = source.current
+ //   source.advance
+ //   if ()
+ // }
   
   
 }
