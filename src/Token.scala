@@ -17,6 +17,11 @@ class Token(tokenType: String, line: Int, column: Int, lexeme: String) {
       tokenType
     }
     override def toString: String = {
-      this.tokenType + " " + this.line + ":" + this.column + " " + this.lexeme
+      if (lexeme==null) {
+        this.tokenType + " " + this.line + ":" + this.column + " "
+      }
+      else {
+        this.tokenType + " " + this.lexeme + " " + this.line + ":" + this.column
+      }
     }
 }
