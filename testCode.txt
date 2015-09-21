@@ -1,7 +1,8 @@
 program demo1;
-{ Declare some constants }
-const x = 6;
-const y = 7;
+{ Declare some constants   }
+const x = 16;
+const y = 72;
 begin
-  print x * y; // should print 42
+  print x div y; // should print 42   
+  print x mod y;
 end.

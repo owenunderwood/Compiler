@@ -1,23 +1,27 @@
-
+//Column positions seem to be one past the end of the token, not the beginning: -1 Skips a character after a NUM: -2 Spurious ID 
+//(empty lexeme) after // comments or unrecognized characters: -5 Stack overflow (State.scala line 61) on EOF (except when no \n on last line): -5  
+//"Illegal start of commentID" message ill-formed: -1 EOF in unclosed brace comment not signalled as error (though no stack overflow): -5
 
 /**
  * @author owenunderwood_2016
  */
 class State {
   val SEMI = ";"
-  val BRACKET = "{"
+  //val BRACKET = "{"
   val SINGLESLASH = "/"
   val SPACE = " "
   val NEWLINE = "\n"
   val PERIOD = "."
   val WHITESPACE = """(?:[\s]|[\n])*""".r
-  
+  val BRACKET = "{"
+
   val STAR = "*"
-  val DIV = "/"
   val PLUS = "+"
   val MINUS = "-"
   val EQUALS = "="
 
+  val MOD = "mod"
+  val DIV = "div"
   val PRG = "program"
   val CONST = "const"
   val BEG = "begin"
@@ -28,7 +32,6 @@ class State {
 
   val NUMBER = """([1-9](?:[0-9])*)""".r
   val ID = """([A-Za-z](?:[A-Za-z0-9])*)""".r
-  //val ID = """(\w(?:[\w|\d])*)""".r
 
   //takes a single input character and continues to create a token as long as it matches 
   //a regular expression from above
@@ -45,28 +48,25 @@ class State {
       source.advance
       if (source.current.toString() == "/") {
         waitFor('\n', source)
+        source.advance
       } else {
         print("illegal start of comment")
       }
-      tokenBuffer("", source)
+      tokenBuffer(source.current.toString(), source)
     case PERIOD =>
       def token = new Token("PERIOD", source.line, source.column, null)
       source.advance
       token
-    case SPACE => 
+    case SPACE =>
       source.advance
       tokenBuffer(source.current.toString, source)
-    case NEWLINE => 
+    case NEWLINE =>
       source.advance
       tokenBuffer(source.current.toString, source)
-      
+
     //OPERATORS      
     case STAR =>
       def token = new Token("STAR", source.line, source.column, null)
-      source.advance
-      token
-    case DIV =>
-      def token = new Token("DIV", source.line, source.column, null)
       source.advance
       token
     case PLUS =>
@@ -82,11 +82,11 @@ class State {
       source.advance
       token
     case ZERO =>
-      def token = new Token("ZERO", source.line, source.column, null)
+      def token = new Token("NUM", source.line, source.column, lexeme)
       source.advance
       token
-      
-      // KEYWORDS & IDENTIFIERS & NUMBERS
+
+    // KEYWORDS & IDENTIFIERS & NUMBERS
     case WHITESPACE(lexeme) =>
       source.advance
       tokenBuffer(source.current.toString(), source)
@@ -98,7 +98,7 @@ class State {
       source.advance
       val curr = source.current.toString()
       tokenBuffer(lexeme + curr, source)
-      
+
     case _ =>
       var lex = lexeme.dropRight(1)
       if (lex.equals(PRG)) {
@@ -107,8 +107,14 @@ class State {
       } else if (lex.equals(CONST)) {
         def token = new Token("CONST", source.line, source.column, null)
         token
+      } else if (lex.equals(DIV)) {
+        def token = new Token("DIV", source.line, source.column, null)
+        token
+      } else if (lex.equals(MOD)) {
+        def token = new Token("MOD", source.line, source.column, null)
+        token
       } else if (lex.equals(BEG)) {
-        def token = new Token("BEG", source.line, source.column, null)
+        def token = new Token("BEGIN", source.line, source.column, null)
         token
       } else if (lex.equals(PRNT)) {
         def token = new Token("PRINT", source.line, source.column, null)
@@ -118,15 +124,13 @@ class State {
         token
       } else if (NUMBER.pattern.matcher(lex).matches) {
         def token = new Token("NUM", source.line, source.column, lex)
-        source.advance
         token
       } else if (ID.pattern.matcher(lex).matches) {
         def token = new Token("ID", source.line, source.column, lex)
         token
       } else {
-        def token = new Token("ID", source.line, source.column, lex)
-        source.advance
-        token
+        println("Unexpected Character At " + source.line.toString() + ":" + source.column.toString())
+        null
       }
   }
 
@@ -134,6 +138,6 @@ class State {
     while (source.current != ch) {
       source.advance
     }
-  }  
+  }
 }
 
