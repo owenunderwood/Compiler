@@ -8,13 +8,14 @@ import scala.collection.mutable.ListBuffer
  */
 object Main {
   def main(args: Array[String]) {
-    //val scanner = new Scanner(new BufferedReader(new InputStreamReader(System.in)))
-    val scanner = new Scanner(new BufferedReader(new FileReader("testCode.txt")))
-    
-    do {
+    val scanner = new Scanner(new BufferedReader(new InputStreamReader(System.in)))
+    //val scanner = new Scanner(new BufferedReader(new FileReader("testCode.txt")))
+    val parser = new Parser
+     do {
       def token = scanner.next
-      println(token)
+      parser.addToken(token)
     } while (scanner.source.atEOF == false)
+      parser.parse
   }
 }
 

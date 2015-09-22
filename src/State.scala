@@ -1,13 +1,9 @@
-//Column positions seem to be one past the end of the token, not the beginning: -1 Skips a character after a NUM: -2 Spurious ID 
-//(empty lexeme) after // comments or unrecognized characters: -5 Stack overflow (State.scala line 61) on EOF (except when no \n on last line): -5  
-//"Illegal start of commentID" message ill-formed: -1 EOF in unclosed brace comment not signalled as error (though no stack overflow): -5
 
 /**
  * @author owenunderwood_2016
  */
 class State {
   val SEMI = ";"
-  //val BRACKET = "{"
   val SINGLESLASH = "/"
   val SPACE = " "
   val NEWLINE = "\n"
@@ -135,9 +131,9 @@ class State {
   }
 
   def waitFor(ch: Char, source: Source) {
-    while (source.current != ch) {
+    while(source.current != ch) {
       source.advance
-    }
+    }      
   }
 }
 
