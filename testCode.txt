@@ -5,4 +5,4 @@ const y = 7;
 begin
   print x * y; // should print 42
   print 12 div y * y + 12 mod y - 12; // should print 0
-end.
+end.   

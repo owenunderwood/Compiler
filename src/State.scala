@@ -54,11 +54,23 @@ class State {
       source.advance
       token
     case SPACE =>
-      source.advance
-      tokenBuffer(source.current.toString, source)
+      if (!source.atEOF) {
+        source.advance
+        tokenBuffer(source.current.toString, source)
+      }
+      else {
+        def token = new Token("EOF", source.line, source.column, null)
+        token
+      }
     case NEWLINE =>
-      source.advance
-      tokenBuffer(source.current.toString, source)
+      if (!source.atEOF) {
+        source.advance
+        tokenBuffer(source.current.toString, source)
+      }
+      else {
+        def token = new Token("EOF", source.line, source.column, null)
+        token
+      }
 
     //OPERATORS      
     case STAR =>
@@ -125,14 +137,15 @@ class State {
         def token = new Token("ID", source.line, source.column, lex)
         token
       } else {
-        println("Unexpected Character At " + source.line.toString() + ":" + source.column.toString())
-        null
+          println("Unexpected Character At " + source.line.toString() + ":" + source.column.toString())
+          source.advance
+          null
       }
   }
 
   def waitFor(ch: Char, source: Source) {
     while(source.current != ch) {
-      source.advance
+        source.advance
     }      
   }
 }
