@@ -1,74 +1,67 @@
-
-
 /**
  * @author owenunderwood_2016
  */
 class State {
   val SEMI = ";"
-  val BRACKET = "{"
   val SINGLESLASH = "/"
-  val WHITESPACE = """\s""".r
+  val SPACE = " "
+  val NEWLINE = "\n"
   val PERIOD = "."
-  val NEWLINE = """\n""".r
-  val NL = "\n".r
+  val WHITESPACE = """(?:[\s]|[\n])*""".r
+  val BRACKET = "{"
 
   val STAR = "*"
-  val DIV = "div"
   val PLUS = "+"
   val MINUS = "-"
   val EQUALS = "="
 
+  val MOD = "mod"
+  val DIV = "div"
   val PRG = "program"
   val CONST = "const"
   val BEG = "begin"
   val PRNT = "print"
+  val END = "end"
 
   val ZERO = "0"
 
-  val NUMBER = """[1-9]?:([0-9])*""".r
-  val ID = """(\w(?:[\w|\d])*)""".r
+  val NUMBER = """([1-9](?:[0-9])*)""".r
+  val ID = """([A-Za-z](?:[A-Za-z0-9])*)""".r
 
   //takes a single input character and continues to create a token as long as it matches 
   //a regular expression from above
   def tokenBuffer(lexeme: String, source: Source): Token = lexeme match {
     case SEMI =>
-      def token = new Token("SEMI", source.line, source.column, ";")
+      def token = new Token("SEMI", source.line, source.column, null)
       source.advance
       token
     case BRACKET =>
       waitFor('}', source)
-      tokenBuffer("", source)
+      source.advance
+      tokenBuffer(source.current.toString(), source)
     case SINGLESLASH =>
       source.advance
       if (source.current.toString() == "/") {
         waitFor('\n', source)
+        source.advance
       } else {
         print("illegal start of comment")
       }
-      tokenBuffer("", source)
-    case WHITESPACE(lexeme) =>
-      source.advance
-      tokenBuffer(source.current.toString(), source)
-    case NEWLINE(lexeme) =>
-      source.advance
       tokenBuffer(source.current.toString(), source)
     case PERIOD =>
       def token = new Token("PERIOD", source.line, source.column, null)
       source.advance
       token
-    case NL(lexeme) =>
-      def token = new Token("NL", source.line, source.column, "\n")
+    case SPACE =>
       source.advance
-      token
-      
+      tokenBuffer(source.current.toString, source)
+    case NEWLINE =>
+      source.advance
+      tokenBuffer(source.current.toString, source)
 
     //OPERATORS      
     case STAR =>
-      def token = new Token("MULT", source.line, source.column, null)
-      source.advance
-      token
-    case DIV =>
-      def token = new Token("DIV", source.line, source.column, null)
+      def token = new Token("STAR", source.line, source.column, null)
       source.advance
       token
     case PLUS =>
@@ -84,53 +77,62 @@ class State {
       source.advance
       token
     case ZERO =>
-      def token = new Token("ZERO", source.line, source.column, null)
+      def token = new Token("NUM", source.line, source.column, lexeme)
       source.advance
       token
-      
-      // KEYWORDS & IDENTIFIERS & NUMBERS
-    case ID(lexeme) =>
-      val curr = source.current.toString()
+
+    // KEYWORDS & IDENTIFIERS & NUMBERS
+    case WHITESPACE(lexeme) =>
       source.advance
+      tokenBuffer(source.current.toString(), source)
+    case ID(lexeme) =>
+      source.advance
+      val curr = source.current.toString()
       tokenBuffer(lexeme + curr, source)
+    case NUMBER(lexeme) =>
+      source.advance
+      val curr = source.current.toString()
+      tokenBuffer(lexeme + curr, source)
+
     case _ =>
-      if (lexeme.equals(PRG)) {
+      var lex = lexeme.dropRight(1)
+      if (lex.equals(PRG)) {
         def token = new Token("PROGRAM", source.line, source.column, null)
-        source.advance
         token
-      } else if (lexeme.equals(CONST)) {
+      } else if (lex.equals(CONST)) {
         def token = new Token("CONST", source.line, source.column, null)
-        source.advance
         token
-      } else if (lexeme.equals(BEG)) {
-        def token = new Token("BEG", source.line, source.column, null)
-        source.advance
-        token
-        } else if (lexeme.equals(DIV)) {
+      } else if (lex.equals(DIV)) {
         def token = new Token("DIV", source.line, source.column, null)
-        source.advance
         token
-      } else if (lexeme.equals(PRNT)) {
+      } else if (lex.equals(MOD)) {
+        def token = new Token("MOD", source.line, source.column, null)
+        token
+      } else if (lex.equals(BEG)) {
+        def token = new Token("BEGIN", source.line, source.column, null)
+        token
+      } else if (lex.equals(PRNT)) {
         def token = new Token("PRINT", source.line, source.column, null)
-        source.advance
         token
-      } else if (NUMBER.pattern.matcher(lexeme).matches) {
-        def token = new Token("NUM", source.line, source.column, lexeme)
-        source.advance
+      } else if (lex.equals(END)) {
+        def token = new Token("END", source.line, source.column, null)
+        token
+      } else if (NUMBER.pattern.matcher(lex).matches) {
+        def token = new Token("NUM", source.line, source.column, lex)
+        token
+      } else if (ID.pattern.matcher(lex).matches) {
+        def token = new Token("ID", source.line, source.column, lex)
         token
       } else {
-        def token = new Token("ID", source.line, source.column, lexeme)
+        println("Unexpected Character At " + source.line.toString() + ":" + source.column.toString())
         source.advance
-        token
+        tokenBuffer(source.current.toString(), source)
       }
   }
 
   def waitFor(ch: Char, source: Source) {
-    while (source.current != ch) {
+    while(source.current != ch) {
       source.advance
-    }
+    }      
   }
-  
-  
 }
-
