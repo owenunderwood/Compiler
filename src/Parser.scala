@@ -34,7 +34,6 @@
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Map
 import scala.collection.mutable.Stack
-import scala.util.control.Breaks
 
 /**
  * @author owenunderwood_2016
@@ -87,6 +86,7 @@ class Parser {
     else {
       println("Error: Expected token type: " + tokenType)
       println("Found: " + tokens(curr).getType)
+      sys.exit
       null
     }
   }
@@ -102,6 +102,7 @@ class Parser {
     }
     matchInput("END")
     matchInput("PERIOD")
+    matchInput("EOF")
   }
   
   def parseConstantDeclarations {

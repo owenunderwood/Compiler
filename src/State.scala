@@ -53,11 +53,23 @@ class State {
       source.advance
       token
     case SPACE =>
-      source.advance
-      tokenBuffer(source.current.toString, source)
+      if (!source.atEOF) {
+        source.advance
+        tokenBuffer(source.current.toString, source)
+      }
+      else {
+        def token = new Token("EOF", source.line, source.column, null)
+        token
+      }
     case NEWLINE =>
-      source.advance
-      tokenBuffer(source.current.toString, source)
+      if (!source.atEOF) {
+         source.advance
+         tokenBuffer(source.current.toString, source)
+      } else {
+        def token = new Token("EOF", source.line, source.column, null)
+        token
+      }
+
 
     //OPERATORS      
     case STAR =>
@@ -122,7 +134,11 @@ class State {
         token
       } else if (ID.pattern.matcher(lex).matches) {
         def token = new Token("ID", source.line, source.column, lex)
+        token       
+      } else if (lex == "") {
+        def token = new Token("EOF", source.line, source.column, lex)
         token
+        
       } else {
         println("Unexpected Character At " + source.line.toString() + ":" + source.column.toString())
         source.advance

@@ -23,6 +23,7 @@ class Source(in: Reader) {
 
     if (next == -1) {
       atEOF = true
+      current = '$';
     } else {
       current = next.toChar
     }
