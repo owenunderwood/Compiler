@@ -70,7 +70,6 @@ class State {
         token
       }
 
-
     //OPERATORS      
     case STAR =>
       def token = new Token("STAR", source.line, source.column, null)
@@ -128,6 +127,7 @@ class State {
         token
       } else if (lex.equals(END)) {
         def token = new Token("END", source.line, source.column, null)
+<<<<<<< HEAD
         token
       } else if (NUMBER.pattern.matcher(lex).matches) {
         def token = new Token("NUM", source.line, source.column, lex)
