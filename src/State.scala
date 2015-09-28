@@ -127,7 +127,6 @@ class State {
         token
       } else if (lex.equals(END)) {
         def token = new Token("END", source.line, source.column, null)
-<<<<<<< HEAD
         token
       } else if (NUMBER.pattern.matcher(lex).matches) {
         def token = new Token("NUM", source.line, source.column, lex)
