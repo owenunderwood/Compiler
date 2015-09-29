@@ -7,7 +7,7 @@ class State {
   val SPACE = " "
   val NEWLINE = "\n"
   val PERIOD = "."
-  val WHITESPACE = """(?:[\s]|[\n])*""".r
+  val WHITESPACE = """(?:[\s]|[\n]|[\t])*""".r
   val BRACKET = "{"
 
   val STAR = "*"
@@ -147,7 +147,12 @@ class State {
 
   def waitFor(ch: Char, source: Source) {
     while(source.current != ch) {
-      source.advance
+      if (source.atEOF) {
+        println("Unclosed comment")
+      }
+      else {
+        source.advance
+      }
     }      
   }
 }

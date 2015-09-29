@@ -130,7 +130,12 @@ class Parser {
       }
       
       else if (check("ID")) {
-        println(IDs((matchInput("ID").getLexeme)))
+        if (IDs.contains(tokens(curr).getLexeme)) {
+          println(IDs((matchInput("ID").getLexeme)))
+        }
+        else {
+          println("Identifier was not declared")
+        }
       }
       
       else if (check("PRINT") | check("STAR") | check("MINUS") | check("PLUS") | check("DIV") | check("MOD")) {

@@ -8,7 +8,14 @@ class Token(tokenType: String, line: Int, column: Int, lexeme: String) {
       line
     }
     def getColumn: Int = {
-      column
+      if (lexeme==null) {
+        val c = column-1
+        c
+      }
+      else {
+        val c = column - lexeme.length()
+        c
+      }
     }
     def getLexeme: String = {
       lexeme
