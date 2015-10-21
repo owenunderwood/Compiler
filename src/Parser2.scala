@@ -67,14 +67,22 @@ class Parser2 {
   
   def parseProgram: Program = {
     matchInput("PROGRAM")
-    val a = matchInput("ID").getLexeme
-    val b = parseBlock
+    val a = matchInput("ID").getLexeme    
     matchInput("SEMI")
-    Program(a, b)    
+    val b = parseBlock
+    val P = new Program(a, b)
+    P
   }
   
-  def parseBlock: Block = {
-    Block(parseConstDecls, parseVarDecls, parseProcDecls, parseStmts)
+  def parseBlock: Block = {    
+    val a = parseConstDecls
+    val b = parseVarDecls
+    val c = parseProcDecls
+    matchInput("BEGIN")
+    val d = parseStmts
+    matchInput("END")
+    val B = new Block(a, b, c, d)
+    B
   }
   
   def parseConstDecls: List[ConstDecl] = {
@@ -102,12 +110,10 @@ class Parser2 {
   }
   
   def parseStmts: List[Stmt] = {
-    matchInput("BEGIN")
     var stmts = collection.mutable.MutableList[Stmt]()
     while (stmtStart.contains(tokens(curr))) {
       stmts += (parseStmt)    
     } 
-    matchInput("END")
     stmts.toList
   }
   
@@ -118,7 +124,8 @@ class Parser2 {
     parseSign
     val b = matchInput("NUM").getLexeme.toInt
     matchInput("SEMI")
-    ConstDecl(a, b)
+    val C = new ConstDecl(a, b)
+    C
   }
   
   def parseVarDecl: VarDecl = {
@@ -127,7 +134,8 @@ class Parser2 {
     matchInput("COLON")
     val b = parseType
     matchInput("SEMI")
-    VarDecl(a, b)
+    val V = new VarDecl(a, b)
+    V
   }
   
   def parseProcDecl: ProcDecl = {
@@ -137,7 +145,8 @@ class Parser2 {
     matchInput("SEMI")
     val c = parseBlock
     matchInput("SEMI")
-    ProcDecl(a, b, c)
+    val P = new ProcDecl(a, b, c)
+    P
   }
   
   def parseStmt: Stmt = {
@@ -148,7 +157,8 @@ class Parser2 {
       val a = parseStmts
       matchInput("END")
       matchInput("SEMI")
-      Sequence(a)
+      val S = new Sequence(a)
+      S
     }else if (tokens(curr).getType == "IF") {
       parseFirstIf
     }else if (tokens(curr).getType == "WHILE") {
@@ -156,12 +166,14 @@ class Parser2 {
       val a = parseExpr
       matchInput("DO")
       val b = parseStmt
-      While(a, b)
+      val W = new While(a, b)
+      W
     }else if (tokens(curr).getType == "PROMPT") {
       parseFirstPrompt
     }else {
       val a = parseItems
-      Print(a)
+      val P = new Print(a)
+      P
     }
   }
   
@@ -206,13 +218,15 @@ class Parser2 {
       val a = matchInput("ID").getLexeme
       matchInput("COLON")
       val b = parseType
-      ValParam(a, b)
+      val V = new ValParam(a, b)
+      V
     }
     else {
       val a = matchInput("ID").getLexeme
       matchInput("COLON")
       val b = parseType
-      VarParam(a, b)
+      val V = new VarParam(a, b)
+      V
     }
   }
     
@@ -222,12 +236,14 @@ class Parser2 {
         matchInput("ASSIGN")
         val b = parseExpr
         matchInput("SEMI")
-        Assign(a, b)
+        val A = new Assign(a, b)
+        A
       }
       else {
         val b = parseArgList
         matchInput("SEMI")
-        Call(a, b)
+        val C = new Call(a, b)
+        C
       }
   }
  
@@ -240,10 +256,12 @@ class Parser2 {
       if (tokens(curr).getType == "ELSE") {
         matchInput("ELSE")
         val c = parseStmt
-        IfThenElse(a, b, c)
+        val I = new IfThenElse(a, b, c)
+        I
       }
       else {
-        IfThen(a, b)
+        val I = new IfThen(a, b)
+        I
       }
     }
     
@@ -253,10 +271,12 @@ class Parser2 {
       if (tokens(curr).getType == "COMMA") {
         matchInput("COMMA")
         val b = matchInput("ID").getLexeme
-        Prompt2(a, b)
+        val P = new Prompt2(a, b)
+        P
       }
       else {
-        Prompt(a)
+        val P = new Prompt(a)
+        P
       }
     }
     
@@ -292,7 +312,8 @@ class Parser2 {
       if (relOps.contains(tokens(curr))) {
         val b = parseRelOp
         val c = parseSimpleExpr
-        BinOp(a, b, c)
+        val B = new BinOp(a, b, c)
+        B
       }
       else {
         a
@@ -322,22 +343,26 @@ class Parser2 {
     def parseItem: Item = {
       if (tokens(curr).getType == "STRING") {
         val a = matchInput("STRING").getLexeme
-        StringItem(a)
+        val S = new StringItem(a)
+        S
       }
       else {
         val a = parseExpr
-        ExprItem(a)
+        val E = new ExprItem(a)
+        E
       }
     }
     
     def parseFactor: Expr = {
       if (tokens(curr).getType == "NUM") {
         val a = matchInput("NUM").getLexeme
-        Num(a.toInt)
+        val N = new Num(a.toInt)
+        N
       }
       else if (tokens(curr).getType == "ID") {
         val a = matchInput("ID").getLexeme
-        Id(a)
+        val I = new Id(a)
+        I
       }
       else if (tokens(curr).getType == "TRUE") {
         matchInput("TRUE").getLexeme
@@ -354,7 +379,8 @@ class Parser2 {
       else if (unOps.contains(tokens(curr))) {
         val a = parseUnOp
         val b = parseFactor
-        UnOp(a, b)
+        val U = new UnOp(a, b)
+        U
       }
       else if (tokens(curr).getType == "LPAREN") {
         matchInput("LPAREN")
@@ -378,7 +404,7 @@ class Parser2 {
         Not
       }
       else {
-        println("Invald Unary Operator")
+        println("Invalid Unary Operator")
         null
       }
     }

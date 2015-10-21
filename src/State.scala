@@ -49,7 +49,6 @@ class State {
     case ATEOF => 
       source.atEOF= true
       def token = new Token("atEOF", source.line, source.column, null)
-      sys.exit  
       token 
     case BRACKET =>
       waitFor('}', source)
