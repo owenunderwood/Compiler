@@ -60,7 +60,7 @@ class Parser2 {
       println("Error: Expected token type: " + tokenType)
       println("Found: " + tokens(curr).getType)
       println(tokens(curr).getLine + " " + tokens(curr).getColumn)
-      sys.exit
+      //sys.exit
       null
     }
   }
@@ -70,7 +70,9 @@ class Parser2 {
     val a = matchInput("ID").getLexeme    
     matchInput("SEMI")
     val b = parseBlock
+    matchInput("PERIOD")
     val P = new Program(a, b)
+    println(P)
     P
   }
   
@@ -82,6 +84,7 @@ class Parser2 {
     val d = parseStmts
     matchInput("END")
     val B = new Block(a, b, c, d)
+    //println(B)
     B
   }
   
@@ -113,7 +116,7 @@ class Parser2 {
     var stmts = collection.mutable.MutableList[Stmt]()
     while (stmtStart.contains(tokens(curr))) {
       stmts += (parseStmt)    
-    } 
+    }
     stmts.toList
   }
   
@@ -125,6 +128,7 @@ class Parser2 {
     val b = matchInput("NUM").getLexeme.toInt
     matchInput("SEMI")
     val C = new ConstDecl(a, b)
+    //println(C)
     C
   }
   
@@ -135,6 +139,7 @@ class Parser2 {
     val b = parseType
     matchInput("SEMI")
     val V = new VarDecl(a, b)
+    //println(V)
     V
   }
   
@@ -146,6 +151,7 @@ class Parser2 {
     val c = parseBlock
     matchInput("SEMI")
     val P = new ProcDecl(a, b, c)
+    //println(P)
     P
   }
   
@@ -157,7 +163,8 @@ class Parser2 {
       val a = parseStmts
       matchInput("END")
       matchInput("SEMI")
-      val S = new Sequence(a)
+      val S = Sequence(a)
+      println(S)
       S
     }else if (tokens(curr).getType == "IF") {
       parseFirstIf
@@ -167,31 +174,35 @@ class Parser2 {
       matchInput("DO")
       val b = parseStmt
       val W = new While(a, b)
+      //println(W)
       W
     }else if (tokens(curr).getType == "PROMPT") {
       parseFirstPrompt
     }else {
+      matchInput("PRINT")
       val a = parseItems
       val P = new Print(a)
+      matchInput("SEMI")
+      //println(P)
       P
     }
   }
   
   def parseType: Type = {
     if (tokens(curr).getType == "INT") {
+      matchInput("INT")
       IntType
     }
-    else if (tokens(curr).getType == "BOOL") {
+    else  { 
+      matchInput("BOOL")
       BoolType
     }
-    else
-      println("Invalid Type")
-      sys.exit
   }
   
   def parseSign: Op1 = {
     if (tokens(curr).getType == "MINUS") {
       matchInput("MINUS")
+      ////println(Neg)
       Neg
     }
     else
@@ -199,10 +210,16 @@ class Parser2 {
   }
   
   def parseParamList: List[Param] = {
-    matchInput("LPAREN")
-    val a = parseParams
-    matchInput("RPAREN")
-    a
+    if (tokens(curr).getType == "LPAREN") {
+      matchInput("LPAREN")
+      val a = parseParams
+      matchInput("RPAREN")
+      matchInput("SEMI")
+      a
+    }
+    else {
+      null
+    }
   }
   
   def parseParams: List[Param] = {
@@ -219,13 +236,16 @@ class Parser2 {
       matchInput("COLON")
       val b = parseType
       val V = new ValParam(a, b)
+      //println(V)
       V
     }
     else {
+      matchInput("VAR")
       val a = matchInput("ID").getLexeme
       matchInput("COLON")
       val b = parseType
       val V = new VarParam(a, b)
+      //println(V)
       V
     }
   }
@@ -237,12 +257,14 @@ class Parser2 {
         val b = parseExpr
         matchInput("SEMI")
         val A = new Assign(a, b)
+        //println(A)
         A
       }
       else {
         val b = parseArgList
         matchInput("SEMI")
         val C = new Call(a, b)
+        //println(C)
         C
       }
   }
@@ -257,10 +279,12 @@ class Parser2 {
         matchInput("ELSE")
         val c = parseStmt
         val I = new IfThenElse(a, b, c)
+        //println(I)
         I
       }
       else {
         val I = new IfThen(a, b)
+        //println(I)
         I
       }
     }
@@ -272,11 +296,13 @@ class Parser2 {
         matchInput("COMMA")
         val b = matchInput("ID").getLexeme
         val P = new Prompt2(a, b)
+        //println(P)
         P
       }
       else {
         val P = new Prompt(a)
-        P
+        //println(P)
+        (P)
       }
     }
     
@@ -313,6 +339,7 @@ class Parser2 {
         val b = parseRelOp
         val c = parseSimpleExpr
         val B = new BinOp(a, b, c)
+        //println(B)
         B
       }
       else {
@@ -344,11 +371,13 @@ class Parser2 {
       if (tokens(curr).getType == "STRING") {
         val a = matchInput("STRING").getLexeme
         val S = new StringItem(a)
+        //println(S)
         S
       }
       else {
         val a = parseExpr
         val E = new ExprItem(a)
+        //println(E)
         E
       }
     }
@@ -357,30 +386,24 @@ class Parser2 {
       if (tokens(curr).getType == "NUM") {
         val a = matchInput("NUM").getLexeme
         val N = new Num(a.toInt)
+        //println(N)
         N
       }
       else if (tokens(curr).getType == "ID") {
         val a = matchInput("ID").getLexeme
         val I = new Id(a)
+        //println(I)
         I
       }
       else if (tokens(curr).getType == "TRUE") {
         matchInput("TRUE").getLexeme
+        //println(True)
         True
       }
       else if (tokens(curr).getType == "FALSE") {
         matchInput("TRUE").getLexeme
+        //println(False)
         False
-      }
-      else if (tokens(curr).getType == "TRUE") {
-        matchInput("TRUE").getLexeme
-        True
-      }
-      else if (unOps.contains(tokens(curr))) {
-        val a = parseUnOp
-        val b = parseFactor
-        val U = new UnOp(a, b)
-        U
       }
       else if (tokens(curr).getType == "LPAREN") {
         matchInput("LPAREN")
@@ -388,23 +411,18 @@ class Parser2 {
         matchInput("RPAREN")
         a
       }
-      else {
-        println("Invalid Factor")
-        null
-      }
-    }
-    
-    def parseUnOp: Op1 = {
-      if (tokens(curr).getType == "MINUS") {
+      else if (tokens(curr).getType == "MINUS") {
         matchInput("MINUS")
-        Neg
+        val a = parseFactor
+        a
       }
       else if (tokens(curr).getType == "NOT") {
         matchInput("NOT")
-        Not
+        val a = parseFactor
+        a
       }
       else {
-        println("Invalid Unary Operator")
+        //println("Invalid Factor")
         null
       }
     }
@@ -412,18 +430,21 @@ class Parser2 {
     def parseAddOp: Op2 = {
       if (tokens(curr).getType == "PLUS") {
         matchInput("PLUS")
+        //println(Plus)
         Plus
       }
       else if (tokens(curr).getType == "MINUS") {
         matchInput("MINUS")
+        //println(Minus)
         Minus
       }
       else if (tokens(curr).getType == "OR") {
         matchInput("OR")
+        //println(Or)
         Or
       }
       else {
-        println("Inlvalid Add Op")
+        //println("Inlvalid Add Op")
         null
       }
     }
@@ -431,22 +452,26 @@ class Parser2 {
     def parseMulOp: Op2 = {
     if (tokens(curr).getType == "STAR") {
         matchInput("STAR")
+        //println(Times)
         Times
       }
       else if (tokens(curr).getType == "DIV") {
         matchInput("DIV")
+        //println(Div)
         Div
       }
       else if (tokens(curr).getType == "MOD") {
         matchInput("MOD")
+        //println(Mod)
         Mod
       }
     else if (tokens(curr).getType == "AND") {
         matchInput("AND")
+        //println(And)
         And
       }
       else {
-        println("Inlvalid Add Op")
+        //println("Inlvalid Add Op")
         null
       }
     }
@@ -454,30 +479,36 @@ class Parser2 {
     def parseRelOp: Op2 = {
       if (tokens(curr).getType == "EQUAL") {
         matchInput("EQUAL")
+        //println(EQ)
         EQ
       }
       else if (tokens(curr).getType == "NOTEQUAL") {
         matchInput("NOTEQUAL")
+        //println(NE)
         NE
       }
       else if (tokens(curr).getType == "LESSEQUAL") {
         matchInput("LESSEQUAL")
+        //println(LE)
         LE
       }
       else if (tokens(curr).getType == "GREATEREQUAL") {
         matchInput("GREATEREQUAL")
+        //println(GE)
         GE
       }
       else if (tokens(curr).getType == "LESS") {
         matchInput("LESS")
+        //println(LT)
         LT
       }
       else if (tokens(curr).getType == "GREATER" ) {
         matchInput("GREATER")
+        //println(GT)
         GT
       }
       else {
-        println("Invalid Relative Operator")
+        //println("Invalid Relative Operator")
         null
       }    
     }
