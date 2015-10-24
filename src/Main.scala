@@ -15,7 +15,7 @@ object Main {
       def token = scanner.next
       parser.addToken(token)      
     } while (scanner.source.atEOF == false)
-      parser.parseProgram
+      parser.parseProgram.toString
   }
 }
 
