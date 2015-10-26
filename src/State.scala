@@ -7,6 +7,10 @@ class State {
   val SPACE = " "
   val NEWLINE = "\n"
   val PERIOD = "."
+  val COLON = ":"
+  val LPAREN = "("
+  val RPAREN = ")"
+  val COMMA = ","
   val WHITESPACE = """(?:[\s]|[\n]|[\t])*""".r
   val BRACKET = "{"
 
@@ -22,17 +26,50 @@ class State {
   val BEG = "begin"
   val PRNT = "print"
   val END = "end"
+  val VAR = "var"
+  val INT = "int"
+  val BOOL = "bool"
+  val PROC = "var"
+  val IF = "if"
+  val THEN = "then"
+  val ELSE = "else"
+  val WHILE = "while"
+  val DO = "do"
+  val PROMPT = "prompt"
+  val AND = "and"
+  val OR = "or"
+  val NOT = "not"
+  val TRUE = "true"
+  val FALSE = "false"
 
   val ZERO = "0"
 
+  val OPERATOR = """[<=]|[>=]|[==]|[<>]|[<]|[>]""".r
   val NUMBER = """([1-9](?:[0-9])*)""".r
   val ID = """([A-Za-z](?:[A-Za-z0-9])*)""".r
+  val STRING = """/"([^"\\]|\\.)*"/""".r
 
   //takes a single input character and continues to create a token as long as it matches 
   //a regular expression from above
   def tokenBuffer(lexeme: String, source: Source): Token = lexeme match {
     case SEMI =>
       def token = new Token("SEMI", source.line, source.column, null)
+      source.advance
+      token
+    case COLON =>
+      def token = new Token("COLON", source.line, source.column, null)
+      source.advance
+      token
+    case LPAREN =>
+      def token = new Token("LPAREN", source.line, source.column, null)
+      source.advance
+      token
+    case RPAREN =>
+      def token = new Token("RPAREN", source.line, source.column, null)
+      source.advance
+      token
+    case COMMA =>
+      def token = new Token("COMMA", source.line, source.column, null)
       source.advance
       token
     case BRACKET =>
@@ -56,15 +93,14 @@ class State {
       if (!source.atEOF) {
         source.advance
         tokenBuffer(source.current.toString, source)
-      }
-      else {
+      } else {
         def token = new Token("EOF", source.line, source.column, null)
         token
       }
     case NEWLINE =>
       if (!source.atEOF) {
-         source.advance
-         tokenBuffer(source.current.toString, source)
+        source.advance
+        tokenBuffer(source.current.toString, source)
       } else {
         def token = new Token("EOF", source.line, source.column, null)
         token
@@ -100,6 +136,10 @@ class State {
       source.advance
       val curr = source.current.toString()
       tokenBuffer(lexeme + curr, source)
+    case OPERATOR(lexeme) =>
+      source.advance
+      val curr = source.current.toString()
+      tokenBuffer(lexeme + curr, source)
     case NUMBER(lexeme) =>
       source.advance
       val curr = source.current.toString()
@@ -109,6 +149,24 @@ class State {
       var lex = lexeme.dropRight(1)
       if (lex.equals(PRG)) {
         def token = new Token("PROGRAM", source.line, source.column, null)
+        token
+      } else if (lex.equals("==")) {
+        def token = new Token("EQUAL", source.line, source.column, null)
+        token
+      } else if (lex.equals(">=")) {
+        def token = new Token("LESSEQUAL", source.line, source.column, null)
+        token
+      } else if (lex.equals("<=")) {
+        def token = new Token("GREATEREQUAL", source.line, source.column, null)
+        token
+      } else if (lex.equals("<>")) {
+        def token = new Token("NOTEQUAL", source.line, source.column, null)
+        token
+      } else if (lex.equals("<")) {
+        def token = new Token("LESS", source.line, source.column, null)
+        token
+      } else if (lex.equals(">")) {
+        def token = new Token("GREATER", source.line, source.column, null)
         token
       } else if (lex.equals(CONST)) {
         def token = new Token("CONST", source.line, source.column, null)
@@ -125,19 +183,70 @@ class State {
       } else if (lex.equals(PRNT)) {
         def token = new Token("PRINT", source.line, source.column, null)
         token
+      } else if (lex.equals(BEG)) {
+        def token = new Token("BEGIN", source.line, source.column, null)
+        token
+      } else if (lex.equals(VAR)) {
+        def token = new Token("VAR", source.line, source.column, null)
+        token
+      } else if (lex.equals(INT)) {
+        def token = new Token("INT", source.line, source.column, null)
+        token
+      } else if (lex.equals(BOOL)) {
+        def token = new Token("BOOL", source.line, source.column, null)
+        token
+      } else if (lex.equals(PROC)) {
+        def token = new Token("PROC", source.line, source.column, null)
+        token
+      } else if (lex.equals(IF)) {
+        def token = new Token("IF", source.line, source.column, null)
+        token
+      } else if (lex.equals(THEN)) {
+        def token = new Token("THEN", source.line, source.column, null)
+        token
+      } else if (lex.equals(ELSE)) {
+        def token = new Token("ELSE", source.line, source.column, null)
+        token
+      } else if (lex.equals(WHILE)) {
+        def token = new Token("WHILE", source.line, source.column, null)
+        token
+      } else if (lex.equals(DO)) {
+        def token = new Token("DO", source.line, source.column, null)
+        token
+      } else if (lex.equals(PROMPT)) {
+        def token = new Token("PROMPT", source.line, source.column, null)
+        token
+      } else if (lex.equals(AND)) {
+        def token = new Token("AND", source.line, source.column, null)
+        token
+      } else if (lex.equals(OR)) {
+        def token = new Token("OR", source.line, source.column, null)
+        token
+      } else if (lex.equals(NOT)) {
+        def token = new Token("NOT", source.line, source.column, null)
+        token
+      } else if (lex.equals(TRUE)) {
+        def token = new Token("TRUE", source.line, source.column, null)
+        token
+      } else if (lex.equals(FALSE)) {
+        def token = new Token("FALSE", source.line, source.column, null)
+        token
       } else if (lex.equals(END)) {
         def token = new Token("END", source.line, source.column, null)
+        token
+      } else if (lex.equals(STRING)) {
+        def token = new Token("STRING", source.line, source.column, lexeme)
         token
       } else if (NUMBER.pattern.matcher(lex).matches) {
         def token = new Token("NUM", source.line, source.column, lex)
         token
       } else if (ID.pattern.matcher(lex).matches) {
         def token = new Token("ID", source.line, source.column, lex)
-        token       
+        token
       } else if (lex == "") {
         def token = new Token("EOF", source.line, source.column, lex)
         token
-        
+
       } else {
         println("Unexpected Character At " + source.line.toString() + ":" + source.column.toString())
         source.advance
@@ -146,13 +255,12 @@ class State {
   }
 
   def waitFor(ch: Char, source: Source) {
-    while(source.current != ch) {
+    while (source.current != ch) {
       if (source.atEOF) {
         println("Unclosed comment")
-      }
-      else {
+      } else {
         source.advance
       }
-    }      
+    }
   }
 }
