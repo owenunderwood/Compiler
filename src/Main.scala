@@ -10,12 +10,12 @@ object Main {
   def main(args: Array[String]) {
     //val scanner = new Scanner(new BufferedReader(new InputStreamReader(System.in)))
     val scanner = new Scanner(new BufferedReader(new FileReader("testCode.txt")))
-    val parser = new Parser
+    val parser = new Parser2
      do {
       def token = scanner.next
       parser.addToken(token)      
     } while (scanner.source.atEOF == false)
-      parser.parse
+      parser.parseProgram.toString
   }
 }
 
