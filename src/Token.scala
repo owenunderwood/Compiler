@@ -12,6 +12,10 @@ class Token(tokenType: String, line: Int, column: Int, lexeme: String) {
         val c = column-1
         c
       }
+      else if (this.tokenType == "STRING"){
+        val c = column - 1
+        c
+      }
       else {
         val c = column - lexeme.length()
         c
