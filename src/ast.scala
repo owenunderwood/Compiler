@@ -1,142 +1,315 @@
 
 case class Program(name: String, block: Block) {
-  override def toString = "Program " + name + '\n' + block
+  def render(indent: String): String = {
+    var result = indent + "Program " + name + "\n";
+    result = result + block.render(indent + "  ")
+    result
+  }
 }
 
-case class Block(consts: List[ConstDecl], vars: List[VarDecl], procs: List[ProcDecl], body: List[Stmt]){
-  override def toString = "Block" + '\n' + consts + vars + procs + body
+case class Block(consts: List[ConstDecl], vars: List[VarDecl], procs: List[ProcDecl], body: List[Stmt]) {
+  def render(indent: String): String = {
+    var result = indent + "Block\n"
+    if (!consts.isEmpty) {
+      for (decl <- consts) {
+        result = result + decl.render(indent + "  ")
+      }
+    }
+    if (!vars.isEmpty) {
+      for (decl <- vars) {
+        result = result + decl.render(indent + "  ")
+      }
+    }
+    if (!procs.isEmpty) {
+      for (decl <- procs) {
+        result = result + decl.render(indent + "  ")
+      }
+    }
+    if (!body.isEmpty) {
+      for (decl <- body) {
+        result = result + decl.render(indent + "  ")
+      }
+    }
+    return result;
+  }
 }
 
 case class ConstDecl(id: String, value: Int) {
-  override def toString = "Const " + id + " = " + value + '\n'
+  def render(indent: String): String = {
+    indent + "Const " + id + " = " + value + "\n"
+  }
 }
 
 case class VarDecl(id: String, typ: Type) {
-  override def toString = "Var " + id + " : " + typ + '\n'
+  def render(indent: String): String = {
+    var result = indent + "Var " + id + " : " + typ + "\n"
+    result
+  }
 }
 
-trait Type
+trait Type {
+  def render(indent: String): String
+}
 case object IntType extends Type {
-  override def toString = "Int"
+  def render(indent: String): String = {
+    var result = "Int"
+    result
+  }
 }
 case object BoolType extends Type {
-  override def toString = "Bool"
+  def render(indent: String): String = {
+    var result = "Bool"
+    result
+  }
 }
 
 case class ProcDecl(id: String, params: List[Param], block: Block) {
-  override def toString = "Proc " + id + '\n' + params + '\n' + block
+  def render(indent: String): String = {
+    var result = indent + "Proc " + id + "\n"
+    if (!params.isEmpty) {
+      for (param <- params) {
+        if (param.getClass == ValParam) {
+          var result = indent + "Val"
+          result = result + id + " : " + param.getType + "\n"
+          result
+        } else {
+          var result = indent + "Var"
+          result = result + id + " : " + param.getType + "\n"
+          result
+        }
+      }
+    }
+    result = result + block.render(indent + "   ")
+    result
+  }
 }
-  
-trait Param
+
+trait Param {
+  def getType: Type
+}
 case class ValParam(id: String, typ: Type) extends Param {
-  override def toString = "Val " + id + " : " + typ
+  override def getType: Type = {
+    typ
+  }
 }
 case class VarParam(id: String, typ: Type) extends Param {
-  override def toString = "Var " + id + " : " + typ
+  override def getType: Type = {
+    typ
+  }
 }
 
-trait Stmt
+trait Stmt {
+  def render(indent: String): String
+}
 case class Assign(id: String, expr: Expr) extends Stmt {
-  override def toString = "Assign " + id + '\n' + expr
+  def render(indent: String): String = {
+    var result = indent + "Assign" + id + "\n"
+    result = result + expr.render(indent + "  ")
+    result
+  }
 }
 case class Call(id: String, args: List[Expr]) extends Stmt {
-  override def toString = "Call " + id + '\n' + args
+  def render(indent: String): String = {
+    var result = indent + "Call " + id + "\n"
+    if (!args.isEmpty) {
+      for (arg <- args) {
+        result = result + arg.render(indent + "  ")
+      }
+    }
+    result
+  }
 }
 case class Sequence(body: List[Stmt]) extends Stmt {
-  override def toString = "Sequence" + '\n' + body
+  def render(indent: String): String = {
+    var result = indent + "Sequence\n"
+    if (!body.isEmpty) {
+      for (stmt <- body) {
+        result = result + stmt.render(indent + "  ")
+      }
+    }
+    result
+  }
 }
 case class IfThen(test: Expr, trueClause: Stmt) extends Stmt {
-  override def toString = "IfThen " + test + '\n' + trueClause
+  def render(indent: String): String = {
+    var result = indent + "IfThen\n"
+    result = result + test.render(indent + "  ")
+    result = result + trueClause.render(indent + "  ")
+    result
+  }
 }
 case class IfThenElse(test: Expr, trueClause: Stmt, falseClause: Stmt) extends Stmt {
-  override def toString = "IfThenElse " + test + '\n' + trueClause + '\n' + falseClause
+  def render(indent: String): String = {
+    var result = indent + "IfThenElse\n"
+    result = result + test.render(indent + "  ")
+    result = result + trueClause.render(indent + "  ")
+    result = result + falseClause.render(indent + "  ")
+    result
+  }
 }
 case class While(test: Expr, body: Stmt) extends Stmt {
-  override def toString = "While " + '\n' + body
+  def render(indent: String): String = {
+    var result = indent + "While\n"
+    result = result + test.render(indent + "  ")
+    result = result + body.render(indent + "  ")
+    result
+  }
 }
 case class Prompt(message: String) extends Stmt {
-  override def toString = "Prompt " + message + '\n'
+  def render(indent: String): String = {
+    var result = indent + "Prompt \"" + message + "\"\n"
+    result
+  }
 }
 case class Prompt2(message: String, id: String) extends Stmt {
-  override def toString = "Prompt " + message + ", " + id + '\n'
+  def render(indent: String): String = {
+    var result = indent + "Prompt2 \"" + message + "\", " + id + "\n"
+    result
+  }
 }
 case class Print(items: List[Item]) extends Stmt {
-  override def toString = "Print " + items + '\n'
+  def render(indent: String): String = {
+    var result = indent + "Print\n"
+    if (!items.isEmpty) {
+      for (item <- items) {
+        result = result + item.render(indent + "  ")
+      }
+    }
+    result
+  }
 }
 
-trait Item 
+trait Item {
+  def render(indent: String): String
+}
 case class ExprItem(expr: Expr) extends Item {
-    override def toString = "ExprItem" + '\n' + expr
+  def render(indent: String): String = {
+    var result = indent + "ExprItem\n"
+    result = result + expr.render(indent + "  ")
+    result
+  }
 }
 case class StringItem(message: String) extends Item {
-    override def toString = "StringItem" + '\n' + message
+  def render(indent: String): String = {
+    var result = indent + "StringItem \"" + message + "\"\n"
+    result
+  }
 }
 
-trait Expr
+trait Expr {
+  def render(indent: String): String
+}
 case class BinOp(left: Expr, op: Op2, right: Expr) extends Expr {
-    override def toString = "BinOp" + op + '\n' + left + right
+  def render(indent: String): String = {
+    var result = indent + "BinOp " + op + "\n"
+    result = result + left.render(indent + "  ")
+    result = result + right.render(indent + "  ")
+    result
+  }
 }
 case class UnOp(op: Op1, expr: Expr) extends Expr {
-    override def toString = "UnOp" + op + '\n' + expr
+  def render(indent: String): String = {
+    var result = indent + "UnOp " + op + "\n"
+    result = result + expr.render(indent + "  ")
+    result
+  }
 }
 case class Num(value: Int) extends Expr {
-    override def toString = "Num " + value + '\n'
+  def render(indent: String): String = {
+    indent + "Num " + value + "\n"
+  }
 }
 case class Id(id: String) extends Expr {
-    override def toString = "Id " + id + '\n'
+  def render(indent: String): String = {
+    indent + "Id " + id + "\n"
+  }
 }
 case object True extends Expr {
-    override def toString = "True"
+  def render(indent: String): String = {
+    "True"
+  }
 }
 case object False extends Expr {
-    override def toString = "False"
+  def render(indent: String): String = {
+    "False"
+  }
 }
 
 trait Op2
 case object EQ extends Op2 {
-    override def toString = "EQ"
+  def render(indent: String): String = {
+    "EQ"
+  }
 }
 case object NE extends Op2 {
-    override def toString = "NE"
+  def render(indent: String): String = {
+    "NE"
+  }
 }
 case object LE extends Op2 {
-    override def toString = "LE"
+  def render(indent: String): String = {
+    "LE"
+  }
 }
 case object GE extends Op2 {
-    override def toString = "GE"
+  def render(indent: String): String = {
+    "GE"
+  }
 }
 case object LT extends Op2 {
-    override def toString = "LT"
+  def render(indent: String): String = {
+    "LT"
+  }
 }
 case object GT extends Op2 {
-    override def toString = "GT"
+  def render(indent: String): String = {
+    "GT"
+  }
 }
 case object Plus extends Op2 {
-    override def toString = "Plus"
+  def render(indent: String): String = {
+    "Plus"
+  }
 }
 case object Minus extends Op2 {
-    override def toString = "Minus"
+  def render(indent: String): String = {
+    "Minus"
+  }
 }
 case object Times extends Op2 {
-    override def toString = "Times"
+  def render(indent: String): String = {
+    "Times"
+  }
 }
 case object Div extends Op2 {
-    override def toString = "Div"
+  def render(indent: String): String = {
+    "Div"
+  }
 }
 case object Mod extends Op2 {
-    override def toString = "Mod"
+  def render(indent: String): String = {
+    "Mod"
+  }
 }
 case object And extends Op2 {
-    override def toString = "And"
+  def render(indent: String): String = {
+    "And"
+  }
 }
 case object Or extends Op2 {
-    override def toString = "Or"
+  def render(indent: String): String = {
+    "Or"
+  }
 }
 
 trait Op1
 case object Neg extends Op1 {
-    override def toString = "Neg"
+  def render(indent: String): String = {
+    "Neg"
+  }
 }
 case object Not extends Op1 {
-    override def toString = "Not"
+  def render(indent: String): String = {
+    "Not"
+  }
 }

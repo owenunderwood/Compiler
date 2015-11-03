@@ -41,6 +41,6 @@ program demo3;
   begin
     prompt "Enter a number", a;
     bar(a, x < y, c2);
-    print "The answer is";
+    print "The answer is """, c2--z+c1, """!";
     prompt "Hit any key to end";
   end.
