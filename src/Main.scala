@@ -5,22 +5,22 @@ import java.io.PrintStream
 import java.io.Reader
 import java.util.Scanner
 
-/**
+/** 
  * @author owenunderwood_2016
  */
 object Main {
   def main(args: Array[String]) {
     val consoleInput = new Scanner(System.in)
     val consoleOuptut = new PrintStream(System.out)
-    
+     
     var source:File = null
     
     if (args.length > 0) {
       source = new File(args(0))
     } else {
-      consoleOuptut.print("Source file? ")
-      val sourceFilename = consoleInput.nextLine()
-      source = new File(sourceFilename)
+     // consoleOuptut.print("Source file? ")
+     // val sourceFilename = consoleInput.nextLine()
+     // source = new File(sourceFilename)
     }
     
     val in = new FileReader(source)
