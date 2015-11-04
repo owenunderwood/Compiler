@@ -10,7 +10,7 @@ import java.util.Scanner
  */
 object Main {
   def main(args: Array[String]) {
-  
+    val consoleInput = new Scanner(System.in)
     val consoleOuptut = new PrintStream(System.out)
     
     var source:File = null
@@ -19,7 +19,7 @@ object Main {
       source = new File(args(0))
     } else {
       consoleOuptut.print("Source file? ")
-//      val sourceFilename = consoleInput.nextLine()
+      val sourceFilename = consoleInput.nextLine()
       source = new File(sourceFilename)
     }
     
