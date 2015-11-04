@@ -1,9 +1,16 @@
 
+
 case class Program(name: String, block: Block) {
   def render(indent: String): String = {
     var result = indent + "Program " + name + "\n";
     result = result + block.render(indent + "  ")
     result
+  }
+  def interpret = {
+    var t = new SymbolTable
+    t.enter(name)
+    block.interpret(t)
+    t.exit
   }
 }
 
@@ -30,14 +37,47 @@ case class Block(consts: List[ConstDecl], vars: List[VarDecl], procs: List[ProcD
         result = result + decl.render(indent + "  ")
       }
     }
-    return result;
+    result
   }
+  
+  def interpret(t: SymbolTable) = {
+    if (!consts.isEmpty) {
+      for (decl <- consts) {
+        decl.interpret(t)
+      }
+    }
+    if (!vars.isEmpty) {
+      for (decl <- vars) {
+        decl.interpret(t)
+      }
+    }
+    if (!procs.isEmpty) {
+      for (decl <- procs) {
+        decl.interpret(t)
+      }
+    }
+    if (!body.isEmpty) {
+      for (decl <- body) {
+        decl.interpret(t)
+      }
+    }
+
+  }
+  
 }
 
 case class ConstDecl(id: String, value: Int) {
   def render(indent: String): String = {
     indent + "Const " + id + " = " + value + "\n"
   }
+  
+  def interpret(t: SymbolTable) = {
+    if (!t.contains(id)) {
+    t.bind(id, new NumValue(value))
+  }
+    else {
+      println("Variable " + id + " is already bound")}
+    }
 }
 
 case class VarDecl(id: String, typ: Type) {
@@ -45,6 +85,19 @@ case class VarDecl(id: String, typ: Type) {
     var result = indent + "Var " + id + " : " + typ + "\n"
     result
   }
+  
+  def interpret(t: SymbolTable) = {
+    if (!t.contains(id)) {
+      if (typ=="BOOL") {
+        t.bind(id, new BoolCell(0))
+      }
+      else {
+        t.bind(id, new IntCell(0))
+      }
+  }
+    else {
+      println("Variable " + id + " is already bound")}
+    }
 }
 
 trait Type {
@@ -82,6 +135,14 @@ case class ProcDecl(id: String, params: List[Param], block: Block) {
     result = result + block.render(indent + "   ")
     result
   }
+  
+  def interpret(t: SymbolTable) = {
+    if (!t.contains(id)) {
+    t.bind(id, new ProcValue(params, block))
+  }
+    else {
+      println("Variable " + id + " is already bound")}
+    }
 }
 
 trait Param {
@@ -107,6 +168,13 @@ case class Assign(id: String, expr: Expr) extends Stmt {
     result = result + expr.render(indent + "  ")
     result
   }
+  
+  def interpret(t: SymbolTable) = {
+    val lhs = t.lookup(id)
+    val rhs = expr.interpret
+    lhs.set(rhs)
+  }  
+  
 }
 case class Call(id: String, args: List[Expr]) extends Stmt {
   def render(indent: String): String = {
@@ -118,6 +186,15 @@ case class Call(id: String, args: List[Expr]) extends Stmt {
     }
     result
   }
+  def interpret(t: SymbolTable) = {
+    val proc = t.lookup(id)
+    for (arg <- args) yield {
+      arg.interpret
+    }
+    t.enter(id)
+    proc.call(args, t)
+    t.exit
+  }  
 }
 case class Sequence(body: List[Stmt]) extends Stmt {
   def render(indent: String): String = {

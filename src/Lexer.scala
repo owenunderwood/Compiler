@@ -2,7 +2,7 @@ import java.io.Reader
 /**
  * @author owenunderwood_2016
  */
-class Scanner(in: Reader) {
+class Lexer(in: Reader) {
     var source = new Source(in)
     
     def next: Token = {
