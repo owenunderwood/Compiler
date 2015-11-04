@@ -177,6 +177,13 @@ case class Assign(id: String, expr: Expr) extends Stmt {
   
 }
 case class Call(id: String, args: List[Expr]) extends Stmt {
+  def call(params: List[Param], block:Block, args: List[Expr], t:SymbolTable) = (params, block, args, t)match {    
+    case(Nil, block, Nil, t)=> block.interpret(t)
+    case((id, int) :: params, block, arg :: args, t) =>
+    case( , , , ) =>
+    case( , , , ) =>
+    case( , , , ) =>
+  }
   def render(indent: String): String = {
     var result = indent + "Call " + id + "\n"
     if (!args.isEmpty) {
@@ -191,8 +198,8 @@ case class Call(id: String, args: List[Expr]) extends Stmt {
     for (arg <- args) yield {
       arg.interpret
     }
+    call
     t.enter(id)
-    proc.call(args, t)
     t.exit
   }  
 }
