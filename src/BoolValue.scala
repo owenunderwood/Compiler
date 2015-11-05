@@ -2,14 +2,14 @@
 class BoolValue(bool: Boolean) extends Value{
 
   def set(v: Value) {
-    println("Attempt to set a const")
+    
   }
   
-  def boolValue:Boolean = {
-    this.bool
+  def boolValue = {
+    bool
   }
   
-  def intValue:Int = {
+  def intValue = {
     println("int /= BoolValue")
     sys.exit()
   }

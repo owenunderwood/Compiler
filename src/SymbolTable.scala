@@ -1,11 +1,13 @@
 import scala.collection.mutable.Stack
 import scala.collection.mutable.Map
+import scala.util.control.Breaks._
+
 /**
  * @author owenunderwood_2016
  */
 class SymbolTable {
-  val scopes = Stack[collection.mutable.Map[String, Value]]()
-  
+  var scopes = Stack[collection.mutable.Map[String, Value]]()
+
   def enter(id: String) = {
     scopes.push(collection.mutable.Map[String, Value]())
   }
@@ -17,26 +19,40 @@ class SymbolTable {
   def contains(id: String): Boolean = {
     if (scopes.top.contains(id)) {
       true
-    }
-    else {
+    } else {
       false
     }
   }
-  
+
   def bind(id: String, typ: Value) = {
     scopes.top += (id -> typ)
   }
-
-  def lookup(id: String):Value = {
-    var res:Value = null
-    for (map <- scopes) {
-      if (map.contains(id)) {
-        res = map.getOrElse(id, null)
-      } else {
-        println("Unkown variable " + id)
-        res = null
+  
+  def lookup(id: String): Value = {
+    var res: Value = null
+    breakable {
+      for (scope <- scopes) {
+        if (scope.contains(id)) {
+          res = scope(id)
+          break
+        }
       }
     }
     res
   }
+  
+  //def lookup(id: String): Value = {
+  //  var res: Value = null
+  //  breakable {
+  //    for (i <- scopes.size-1 to 0) {
+  //      if (scopes(i).contains(id)) {
+  //        res = scopes(i).getOrElse(id, null)
+  //        break
+  //     } else {
+  //       println("Unkown variable " + id)
+  //     }
+  //    }
+  //  }
+  //  res
+  //}
 }

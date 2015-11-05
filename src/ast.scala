@@ -89,10 +89,10 @@ case class VarDecl(id: String, typ: Type) {
   def interpret(t: SymbolTable) = {
     if (!t.contains(id)) {
       if (typ.equals(IntType)) {
-        t.bind(id, new IntCell(0))
+        t.bind(id, new IntCell)
       }
       else {
-        t.bind(id, new BoolCell(false))
+        t.bind(id, new BoolCell)
       }
   }
     else {
@@ -174,10 +174,10 @@ case class Assign(id: String, expr: Expr) extends Stmt {
     val lhs = t.lookup(id)
     val rhs = expr.interpret(t)
     if (rhs.isInstanceOf[BoolCell]) {
-      lhs.set(new BoolCell(rhs.boolValue))
+      lhs.set(rhs)
     }
     else {
-      lhs.set(new IntCell(rhs.intValue))
+      lhs.set(rhs)
     }
   }    
 }
@@ -185,10 +185,10 @@ case class Call(id: String, args: List[Expr]) extends Stmt {
   def call(params: List[Param], block:Block, args: List[Value], t:SymbolTable):Unit = (params, block, args, t)match {    
     case(Nil, block, Nil, t)=> block.interpret(t)
     case(VarParam(id, IntType) :: ps, block, a :: as, t) => 
-      t.bind(id, new IntCell(a.intValue))
+      t.bind(id, new IntCell)
       call(ps, block, as, t)
     case(VarParam(id, BoolType) :: ps, block, a :: as, t) =>
-      t.bind(id, new BoolCell(a.boolValue))
+      t.bind(id, new BoolCell)
       call(ps, block, as, t)
     case(ValParam(id, IntType) :: ps, block, a :: as, t) =>
       t.bind(id, a)
@@ -212,9 +212,9 @@ case class Call(id: String, args: List[Expr]) extends Stmt {
     val P:ProcValue = t.lookup(id).procValue
     val a = for (arg <- args) yield {
       arg.interpret(t)
-    }    
+    } 
+    t.enter(id)   
     call(P.getParams, P.getBlock, a, t)
-    t.enter(id)
     t.exit
   }  
 }
@@ -243,7 +243,7 @@ case class IfThen(test: Expr, trueClause: Stmt) extends Stmt {
     result
   }
   
-  def interpret(t: SymbolTable):Unit = {
+  def interpret(t: SymbolTable) = {
     val tst = test.interpret(t)
     if (tst.boolValue) {
       trueClause.interpret(t)
@@ -277,10 +277,11 @@ case class While(test: Expr, body: Stmt) extends Stmt {
   }
   
   def interpret(t: SymbolTable) = {
+    var l = test
     var tst = test.interpret(t)
     while (tst.boolValue) {
       body.interpret(t)
-      tst = test.interpret(t)
+      tst=l.interpret(t)
     }
   }
 }
@@ -393,8 +394,8 @@ case class UnOp(op: Op1, expr: Expr) extends Expr {
   }
 
   def switchOp(op: Op1, v: Value):Value = op match {
-      case(Neg) =>  new IntValue(-1 * v.intValue)
-      case(Not) =>  new BoolValue(!v.boolValue)
+      case(Neg) =>  new IntValue(-1 * (v.intValue))
+      case(Not) =>  new BoolValue(!(v.boolValue))
     }
 }
 case class Num(value: Int) extends Expr {

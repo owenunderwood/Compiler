@@ -3,7 +3,8 @@
 /**
  * @author owenunderwood_2016
  */
-class BoolCell(bool: Boolean) extends Value {
+class BoolCell extends Value {
+  
   var boolValue = false
   
   def set(v: Value) = {
@@ -15,11 +16,7 @@ class BoolCell(bool: Boolean) extends Value {
     }
   }
   
-  def get:Boolean = {
-    boolValue
-  }
-  
-  def intValue:Int = {
+  def intValue = {
     println("int /= BoolCell")
     sys.exit()
   }
