@@ -277,11 +277,10 @@ case class While(test: Expr, body: Stmt) extends Stmt {
   }
   
   def interpret(t: SymbolTable) = {
-    var l = test
     var tst = test.interpret(t)
     while (tst.boolValue) {
       body.interpret(t)
-      tst=l.interpret(t)
+      tst = test.interpret(t)
     }
   }
 }
