@@ -13,4 +13,15 @@ class IntCell(int: Int) extends Value {
   def get:Int = {
     intValue
   }
+
+   def boolValue = {
+    println("Attempt to use an int as a bool")
+    sys.exit()
+  }
+
+  def procValue = {
+    println("Attempt to use an int as a proc")
+    sys.exit()
+  }
+
 }

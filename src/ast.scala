@@ -88,7 +88,7 @@ case class VarDecl(id: String, typ: Type) {
   
   def interpret(t: SymbolTable) = {
     if (!t.contains(id)) {
-      if (typ=="BOOL") {
+      if (typ == BoolType) {
         t.bind(id, new IntCell(0))
       }
       else {
@@ -181,15 +181,15 @@ case class Call(id: String, args: List[Expr]) extends Stmt {
   def call(params: List[Param], block:Block, args: List[Value], t:SymbolTable):Unit = (params, block, args, t)match {    
     case(Nil, block, Nil, t)=> block.interpret(t)
     case(ValParam(id, IntType) :: params, block, arg :: args, t) => 
-      t.bind(id, new IntValue(arg.intValue))
+      t.bind(id, new IntCell(arg.intValue))
       call(params, block, args, t)
     case(ValParam(id, BoolType) :: params, block, arg :: args, t) =>
-      t.bind(id, new BoolValue(arg.boolValue))
+      t.bind(id, new BoolCell(arg.boolValue))
       call(params, block, args, t)
-    case(ValParam(id, IntType) :: params, block, arg :: args, t) =>
+    case(VarParam(id, IntType) :: params, block, arg :: args, t) =>
       t.bind(id, arg)
       call(params, block, args, t)
-    case(ValParam(id, BoolType) :: params, block, arg :: args, t) =>
+    case(VarParam(id, BoolType) :: params, block, arg :: args, t) =>
       t.bind(id, arg)
       call(params, block, args, t)
     case _ => 
@@ -335,11 +335,17 @@ case class ExprItem(expr: Expr) extends Item {
     result = result + expr.render(indent + "  ")
     result
   }
+  def interpret(t: SymbolTable) = {
+    
+  }
 }
 case class StringItem(message: String) extends Item {
   def render(indent: String): String = {
     var result = indent + "StringItem \"" + message + "\"\n"
     result
+  }
+  def interpret(t: SymbolTable) = {
+    
   }
 }
 
