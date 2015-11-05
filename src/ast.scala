@@ -73,7 +73,7 @@ case class ConstDecl(id: String, value: Int) {
   
   def interpret(t: SymbolTable) = {
     if (!t.contains(id)) {
-    t.bind(id, new NumValue(value))
+    t.bind(id, new IntValue(value))
   }
     else {
       println("Variable " + id + " is already bound")}
@@ -89,10 +89,10 @@ case class VarDecl(id: String, typ: Type) {
   def interpret(t: SymbolTable) = {
     if (!t.contains(id)) {
       if (typ=="BOOL") {
-        t.bind(id, new BoolCell(0))
+        t.bind(id, new IntCell(0))
       }
       else {
-        t.bind(id, new IntCell(0))
+        t.bind(id, new BoolCell(false))
       }
   }
     else {
@@ -161,6 +161,7 @@ case class VarParam(id: String, typ: Type) extends Param {
 
 trait Stmt {
   def render(indent: String): String
+  def interpret(t: SymbolTable)
 }
 case class Assign(id: String, expr: Expr) extends Stmt {
   def render(indent: String): String = {
@@ -171,19 +172,29 @@ case class Assign(id: String, expr: Expr) extends Stmt {
   
   def interpret(t: SymbolTable) = {
     val lhs = t.lookup(id)
-    val rhs = expr.interpret
+    val rhs = expr.interpret(t)
     lhs.set(rhs)
   }  
   
 }
 case class Call(id: String, args: List[Expr]) extends Stmt {
-  def call(params: List[Param], block:Block, args: List[Expr], t:SymbolTable) = (params, block, args, t)match {    
+  def call(params: List[Param], block:Block, args: List[Value], t:SymbolTable):Unit = (params, block, args, t)match {    
     case(Nil, block, Nil, t)=> block.interpret(t)
-    case((id, int) :: params, block, arg :: args, t) =>
-    case( , , , ) =>
-    case( , , , ) =>
-    case( , , , ) =>
+    case(ValParam(id, IntType) :: params, block, arg :: args, t) => 
+      t.bind(id, new IntValue(arg.intValue))
+      call(params, block, args, t)
+    case(ValParam(id, BoolType) :: params, block, arg :: args, t) =>
+      t.bind(id, new BoolValue(arg.boolValue))
+      call(params, block, args, t)
+    case(ValParam(id, IntType) :: params, block, arg :: args, t) =>
+      t.bind(id, arg)
+      call(params, block, args, t)
+    case(ValParam(id, BoolType) :: params, block, arg :: args, t) =>
+      t.bind(id, arg)
+      call(params, block, args, t)
+    case _ => 
   }
+  
   def render(indent: String): String = {
     var result = indent + "Call " + id + "\n"
     if (!args.isEmpty) {
@@ -194,15 +205,16 @@ case class Call(id: String, args: List[Expr]) extends Stmt {
     result
   }
   def interpret(t: SymbolTable) = {
-    val proc = t.lookup(id)
-    for (arg <- args) yield {
-      arg.interpret
-    }
-    call
+    val P:ProcValue = t.lookup(id).procValue
+    val a = for (arg <- args) yield {
+      arg.interpret(t)
+    }    
+    call(P.getParams, P.getBlock, a, t)
     t.enter(id)
     t.exit
   }  
 }
+
 case class Sequence(body: List[Stmt]) extends Stmt {
   def render(indent: String): String = {
     var result = indent + "Sequence\n"
@@ -213,6 +225,11 @@ case class Sequence(body: List[Stmt]) extends Stmt {
     }
     result
   }
+  def interpret(t: SymbolTable) = {
+    for (s <- body) yield {
+      s.interpret(t)
+    }
+  }
 }
 case class IfThen(test: Expr, trueClause: Stmt) extends Stmt {
   def render(indent: String): String = {
@@ -220,6 +237,13 @@ case class IfThen(test: Expr, trueClause: Stmt) extends Stmt {
     result = result + test.render(indent + "  ")
     result = result + trueClause.render(indent + "  ")
     result
+  }
+  
+  def interpret(t: SymbolTable):Unit = {
+    val tst = test.interpret(t)
+    if (tst.boolValue) {
+      trueClause.interpret(t)
+    }
   }
 }
 case class IfThenElse(test: Expr, trueClause: Stmt, falseClause: Stmt) extends Stmt {
@@ -230,6 +254,15 @@ case class IfThenElse(test: Expr, trueClause: Stmt, falseClause: Stmt) extends S
     result = result + falseClause.render(indent + "  ")
     result
   }
+  def interpret(t: SymbolTable) = {
+    val tst = test.interpret(t)
+    if (tst.boolValue) {
+      trueClause.interpret(t)
+    }
+    else {
+      falseClause.interpret(t)
+    }
+  }
 }
 case class While(test: Expr, body: Stmt) extends Stmt {
   def render(indent: String): String = {
@@ -238,17 +271,35 @@ case class While(test: Expr, body: Stmt) extends Stmt {
     result = result + body.render(indent + "  ")
     result
   }
+  
+  def interpret(t: SymbolTable) = {
+    var tst = test.interpret(t)
+    while (tst.boolValue) {
+      body.interpret(t)
+      tst = test.interpret(t)
+    }
+  }
 }
 case class Prompt(message: String) extends Stmt {
   def render(indent: String): String = {
     var result = indent + "Prompt \"" + message + "\"\n"
     result
   }
+  def interpret(t: SymbolTable) = {
+    print(message)
+    readLine
+  }
 }
 case class Prompt2(message: String, id: String) extends Stmt {
   def render(indent: String): String = {
     var result = indent + "Prompt2 \"" + message + "\", " + id + "\n"
     result
+  }
+  def interpret(t: SymbolTable) = {
+    val lhs = t.lookup(id)
+    print(message + " ")
+    val input = readLine
+    lhs.set(new IntValue(input.toInt))
   }
 }
 case class Print(items: List[Item]) extends Stmt {
@@ -261,10 +312,22 @@ case class Print(items: List[Item]) extends Stmt {
     }
     result
   }
+  def interpret(t: SymbolTable) = {
+   for(item <- items) {
+     if (item.getClass.toString()=="Expr") {
+       val v = item.interpret(t)
+     }
+     else {
+       print(item)
+     }
+   }
+   println()
+  }
 }
 
 trait Item {
   def render(indent: String): String
+  def interpret(t: SymbolTable)
 }
 case class ExprItem(expr: Expr) extends Item {
   def render(indent: String): String = {
@@ -282,6 +345,7 @@ case class StringItem(message: String) extends Item {
 
 trait Expr {
   def render(indent: String): String
+  def interpret(t: SymbolTable): Value
 }
 case class BinOp(left: Expr, op: Op2, right: Expr) extends Expr {
   def render(indent: String): String = {
@@ -290,6 +354,26 @@ case class BinOp(left: Expr, op: Op2, right: Expr) extends Expr {
     result = result + right.render(indent + "  ")
     result
   }
+  def interpret(t: SymbolTable):Value = {
+    val lhs = left.interpret(t)
+    val rhs = right.interpret(t)
+    switchOp(lhs, op, rhs)
+  }
+  def switchOp(lhs: Value, op: Op2, rhs: Value):Value = op match {
+      case(And) => new BoolValue(lhs.boolValue && rhs.boolValue)
+      case(Or) =>  new BoolValue(lhs.boolValue | rhs.boolValue)
+      case(EQ) =>  new BoolValue(lhs.intValue == rhs.intValue)
+      case(NE) =>  new BoolValue(lhs.intValue != rhs.intValue)
+      case(LE) => new BoolValue(lhs.intValue <= rhs.intValue)
+      case(LT) => new BoolValue(lhs.intValue < rhs.intValue)
+      case(GE) => new BoolValue(lhs.intValue >= rhs.intValue)
+      case(GT) =>  new BoolValue(lhs.intValue > rhs.intValue)
+      case(Plus) =>  new IntValue(lhs.intValue + rhs.intValue)  
+      case(Mod) =>  new IntValue(lhs.intValue % rhs.intValue)
+      case(Minus) =>  new IntValue(lhs.intValue - rhs.intValue)
+      case(Times) => new IntValue(lhs.intValue * rhs.intValue)
+      case(Div) => new IntValue(lhs.intValue / rhs.intValue)
+    }
 }
 case class UnOp(op: Op1, expr: Expr) extends Expr {
   def render(indent: String): String = {
@@ -297,11 +381,24 @@ case class UnOp(op: Op1, expr: Expr) extends Expr {
     result = result + expr.render(indent + "  ")
     result
   }
+  def interpret(t: SymbolTable):Value = {
+    val v = expr.interpret(t)
+    switchOp(op, v)
+  }
+
+  def switchOp(op: Op1, v: Value):Value = op match {
+      case(Neg) =>  new IntValue(-1 * v.intValue)
+      case(Not) =>  new BoolValue(!v.boolValue)
+    }
 }
 case class Num(value: Int) extends Expr {
   def render(indent: String): String = {
     indent + "Num " + value + "\n"
   }
+  def interpret(t: SymbolTable):IntValue = {
+    val v = new IntValue(value)
+    v
+    }
 }
 case class Id(id: String) extends Expr {
   def render(indent: String): String = {
@@ -312,11 +409,19 @@ case object True extends Expr {
   def render(indent: String): String = {
     "True"
   }
+  def interpret(t: SymbolTable):BoolValue = {
+    val v = new BoolValue(true)
+    v
+    }
 }
 case object False extends Expr {
   def render(indent: String): String = {
     "False"
   }
+  def interpret(t: SymbolTable):BoolValue = {
+    val v = new BoolValue(false)
+    v
+    }
 }
 
 trait Op2

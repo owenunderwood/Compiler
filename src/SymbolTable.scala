@@ -27,14 +27,16 @@ class SymbolTable {
     scopes.top += (id -> typ)
   }
 
-  def lookup(id: String) = {
+  def lookup(id: String):Value = {
+    var res:Value = null
     for (map <- scopes) {
       if (map.contains(id)) {
-        map(id)
+        res = map.getOrElse(id, null)
       } else {
         println("Unkown variable " + id)
-        null
+        res = null
       }
     }
+    res
   }
 }

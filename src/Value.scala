@@ -4,6 +4,7 @@
  * @author owenunderwood_2016
  */
 trait Value {
-  def asDouble
-  def asStatement
+  def boolValue:Boolean
+  def intValue:Int
+  def procValue:ProcValue
 }
