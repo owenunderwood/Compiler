@@ -10,12 +10,12 @@ class BoolValue(bool: Boolean) extends Value{
   }
   
   def intValue:Int = {
-    println("Attempt to use a number as a statement")
+    println("int /= BoolValue")
     sys.exit()
   }
 
   def procValue = {
-    println("Attempt to use a procedure as a boolean")
+    println("proc /= BoolValue")
     sys.exit()
   }
 }

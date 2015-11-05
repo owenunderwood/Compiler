@@ -14,12 +14,12 @@ class IntValue(int: Int) extends Value{
   }
   
   def boolValue = {
-    println("Attempt to use an int as a boolean")
+    println("bool /= IntValue")
     sys.exit
   }
   
   def procValue = {
-    println("Attempt to use an int as a procedure")
+    println("proc /= IntValue")
     sys.exit
   }
 }

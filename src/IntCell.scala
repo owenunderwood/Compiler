@@ -15,12 +15,12 @@ class IntCell(int: Int) extends Value {
   }
 
    def boolValue = {
-    println("Attempt to use an int as a bool")
+    println("bool /= IntCell")
     sys.exit()
   }
 
   def procValue = {
-    println("Attempt to use an int as a proc")
+    println("proc /= IntCell")
     sys.exit()
   }
 

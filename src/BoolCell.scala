@@ -20,12 +20,12 @@ class BoolCell(bool: Boolean) extends Value {
   }
   
   def intValue:Int = {
-    println("Attempt to use a number as a statement")
+    println("int /= BoolCell")
     sys.exit()
   }
 
   def procValue = {
-    println("Attempt to use a procedure as a boolean")
+    println("proc /= BoolCell")
     sys.exit()
   }
 }

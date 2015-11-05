@@ -88,7 +88,7 @@ case class VarDecl(id: String, typ: Type) {
   
   def interpret(t: SymbolTable) = {
     if (!t.contains(id)) {
-      if (typ == BoolType) {
+      if (typ.equals(IntType)) {
         t.bind(id, new IntCell(0))
       }
       else {
@@ -173,25 +173,29 @@ case class Assign(id: String, expr: Expr) extends Stmt {
   def interpret(t: SymbolTable) = {
     val lhs = t.lookup(id)
     val rhs = expr.interpret(t)
-    lhs.set(rhs)
-  }  
-  
+    if (rhs.isInstanceOf[BoolCell]) {
+      lhs.set(new BoolCell(rhs.boolValue))
+    }
+    else {
+      lhs.set(new IntCell(rhs.intValue))
+    }
+  }    
 }
 case class Call(id: String, args: List[Expr]) extends Stmt {
   def call(params: List[Param], block:Block, args: List[Value], t:SymbolTable):Unit = (params, block, args, t)match {    
     case(Nil, block, Nil, t)=> block.interpret(t)
-    case(ValParam(id, IntType) :: params, block, arg :: args, t) => 
-      t.bind(id, new IntCell(arg.intValue))
-      call(params, block, args, t)
-    case(ValParam(id, BoolType) :: params, block, arg :: args, t) =>
-      t.bind(id, new BoolCell(arg.boolValue))
-      call(params, block, args, t)
-    case(VarParam(id, IntType) :: params, block, arg :: args, t) =>
-      t.bind(id, arg)
-      call(params, block, args, t)
-    case(VarParam(id, BoolType) :: params, block, arg :: args, t) =>
-      t.bind(id, arg)
-      call(params, block, args, t)
+    case(VarParam(id, IntType) :: ps, block, a :: as, t) => 
+      t.bind(id, new IntCell(a.intValue))
+      call(ps, block, as, t)
+    case(VarParam(id, BoolType) :: ps, block, a :: as, t) =>
+      t.bind(id, new BoolCell(a.boolValue))
+      call(ps, block, as, t)
+    case(ValParam(id, IntType) :: ps, block, a :: as, t) =>
+      t.bind(id, a)
+      call(ps, block, as, t)
+    case(ValParam(id, BoolType) :: ps, block, a :: as, t) =>
+      t.bind(id, a)
+      call(ps, block, as, t)
     case _ => 
   }
   
@@ -298,8 +302,8 @@ case class Prompt2(message: String, id: String) extends Stmt {
   def interpret(t: SymbolTable) = {
     val lhs = t.lookup(id)
     print(message + " ")
-    val input = readLine
-    lhs.set(new IntValue(input.toInt))
+    val input = readLine.toInt
+    lhs.set(new IntValue(input))
   }
 }
 case class Print(items: List[Item]) extends Stmt {
@@ -397,7 +401,7 @@ case class Num(value: Int) extends Expr {
   def render(indent: String): String = {
     indent + "Num " + value + "\n"
   }
-  def interpret(t: SymbolTable):IntValue = {
+  def interpret(t: SymbolTable):Value = {
     val v = new IntValue(value)
     v
     }
@@ -407,26 +411,23 @@ case class Id(id: String) extends Expr {
     indent + "Id " + id + "\n"
   }
   def interpret(t:SymbolTable):Value = {
-    val v = t.lookup(id)
-    v
+    t.lookup(id)
   }
 }
 case object True extends Expr {
   def render(indent: String): String = {
     "True"
   }
-  def interpret(t: SymbolTable):BoolValue = {
-    val v = new BoolValue(true)
-    v
+  def interpret(t: SymbolTable):Value = {
+    new BoolValue(true)
     }
 }
 case object False extends Expr {
   def render(indent: String): String = {
     "False"
   }
-  def interpret(t: SymbolTable):BoolValue = {
-    val v = new BoolValue(false)
-    v
+  def interpret(t: SymbolTable):Value = {
+    new BoolValue(false)
     }
 }
 

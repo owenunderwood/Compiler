@@ -14,12 +14,12 @@ class ProcValue(params: List[Param], block: Block) extends Value{
   } 
   
   def intValue = {
-    println("Attempt to use a procedure as a number")
+    println("int /= ProcValue")
     sys.exit
   }
   
   def boolValue = {
-    println("Attempt to use a procedure as a boolean")
+    println("bool /= ProcValue")
     sys.exit
   }
   
