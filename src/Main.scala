@@ -4,6 +4,8 @@ import java.io.IOException
 import java.io.PrintStream
 import java.io.Reader
 import java.util.Scanner
+import java.io.BufferedReader
+
 
 /**
  * @author owenunderwood_2016
@@ -24,9 +26,14 @@ object Main {
     }
 
     val in = new FileReader(source)
-    val lexer = new Lexer(in)
+    val lexer = new Lexer(new BufferedReader(in))
     val parser = new Parser2
-    val P = parser.parseProgram
+    do {
+      def token = lexer.next
+      parser.addToken(token)      
+    } while (lexer.source.atEOF == false)
+    
+      val P = parser.parseProgram
 
     in.close()
     // do {

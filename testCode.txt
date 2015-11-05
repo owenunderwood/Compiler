@@ -42,5 +42,5 @@ program demo3;
     prompt "Enter a number", a;
     bar(a, x < y, c2);
     print "The answer is """, c2--z+c1, """!";
-    prompt "Hit any key to end";
+    prompt "Hit ENTER to end";
   end.

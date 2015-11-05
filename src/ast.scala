@@ -314,12 +314,7 @@ case class Print(items: List[Item]) extends Stmt {
   }
   def interpret(t: SymbolTable) = {
    for(item <- items) {
-     if (item.getClass.toString()=="Expr") {
-       val v = item.interpret(t)
-     }
-     else {
-       print(item)
-     }
+     item.interpret(t)
    }
    println()
   }
@@ -336,7 +331,8 @@ case class ExprItem(expr: Expr) extends Item {
     result
   }
   def interpret(t: SymbolTable) = {
-    
+    val v = expr.interpret(t)
+    print(v.intValue)
   }
 }
 case class StringItem(message: String) extends Item {
@@ -345,7 +341,7 @@ case class StringItem(message: String) extends Item {
     result
   }
   def interpret(t: SymbolTable) = {
-    
+    print(message)
   }
 }
 
@@ -409,6 +405,10 @@ case class Num(value: Int) extends Expr {
 case class Id(id: String) extends Expr {
   def render(indent: String): String = {
     indent + "Id " + id + "\n"
+  }
+  def interpret(t:SymbolTable):Value = {
+    val v = t.lookup(id)
+    v
   }
 }
 case object True extends Expr {

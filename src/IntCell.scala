@@ -6,8 +6,8 @@
 class IntCell(int: Int) extends Value {
   var intValue = 0
   
-  def set(int: Int) = {
-    intValue = int
+  def set(v: Value) = {
+    intValue = v.intValue
   }
   
   def get:Int = {
