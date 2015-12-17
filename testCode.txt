@@ -18,7 +18,7 @@ program demo3;
       if b then
         print "Hooray!";
     end;
-  proc bar(n: int, b: bool, var r: int);
+  proc bar(n: int, var b: bool, var r: int);
     proc fact(n: int, var r: int);
       begin
         if b or not b then

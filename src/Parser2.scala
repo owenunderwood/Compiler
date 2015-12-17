@@ -459,7 +459,7 @@ class Parser2 {
       //println(True)
       True
     } else if (tokens(curr).getType == "FALSE") {
-      matchInput("TRUE").getLexeme
+      matchInput("FALSE").getLexeme
       //println(False)
       False
     } else if (tokens(curr).getType == "LPAREN") {

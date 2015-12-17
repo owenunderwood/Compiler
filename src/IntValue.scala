@@ -10,7 +10,7 @@ class IntValue(int: Int) extends Value{
   }
   
   def set(v: Value) = {
-    
+    println("Attempt to set a Val")
   }
   
   def boolValue = {

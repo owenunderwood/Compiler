@@ -3,8 +3,8 @@
 /**
  * @author owenunderwood_2016
  */
-class IntCell extends Value {
-  var intValue = 0
+class IntCell(int: Int) extends Value {
+  var intValue = int
   
   def set(v: Value) = {
     intValue = v.intValue

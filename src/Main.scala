@@ -43,6 +43,7 @@ object Main {
     //  }
 
     val program = parser.parseProgram
+    program.check
     program.interpret
     //val result = program.render("")
     //println(result)

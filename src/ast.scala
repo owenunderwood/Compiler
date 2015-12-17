@@ -18,6 +18,14 @@ case class Program(name: String, block: Block) {
     block.check(t)
     t.exit
   }
+  
+  def generate: Info = {
+    var t = new SymbolTableInfo
+    t.enter(name)
+    block.generate(t)
+    t.exit
+    new HALT
+  }
 }
 
 case class Block(consts: List[ConstDecl], vars: List[VarDecl], procs: List[ProcDecl], body: List[Stmt]) {
@@ -92,6 +100,9 @@ case class Block(consts: List[ConstDecl], vars: List[VarDecl], procs: List[ProcD
       }
     }
   }  
+  def generate(t: SymbolTableInfo) {
+    val s = new LABEL()
+  }
 }
 
 case class ConstDecl(id: String, value: Int) {

@@ -3,9 +3,8 @@
 /**
  * @author owenunderwood_2016
  */
-class BoolCell extends Value {
-  
-  var boolValue = false
+class BoolCell(bool: Boolean) extends Value {
+  var boolValue = bool
   
   def set(v: Value) = {
     if (v.boolValue == true) {
